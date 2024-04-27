@@ -37,7 +37,7 @@ if (BUILD_SHARED_LIBS)
 endif()
 
 add_library(MRFMat
-    srcs/init.c)
+    srcs/intern.c srcs/init.c)
 target_include_directories(MRFMat PUBLIC heads PUBLIC .)
 
 #if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")

@@ -20,16 +20,45 @@ copies or substantial portions of the Software.
 #include <mrfmat.h>
 #include <stdlib.h>
 
-#define MRFMAT_FREE(x)            \
-    do                            \
-    {                             \
-        if (MRFMAT_CAPA(x))       \
-        {                         \
-            free(MRFMAT_DATA(x)); \
-                                  \
-            MRFMAT_SIZE(x) = 0;   \
-            MRFMAT_CAPA(x) = 0;   \
-        }                         \
+#define MRFMAT_ALLOC(x, row, col, size)               \
+    do                                                \
+    {                                                 \
+        MRFMAT_DATA(x) = (mrfmat_data_t)malloc(size); \
+        if (!MRFMAT_DATA(x))                          \
+            return MRFMAT_RES_MEM_ERROR;              \
+                                                      \
+        MRFMAT_ROW(x) = row;                          \
+        MRFMAT_COL(x) = col;                          \
+        return MRFMAT_RES_NOERROR;                    \
     } while (0)
+
+#define MRFMAT_CLEAR_REALLOC(x, row, col, size)         \
+    do                                                  \
+    {                                                   \
+        free(MRFMAT_DATA(mat));                         \
+                                                        \
+        MRFMAT_DATA(mat) = (mrfmat_data_t)malloc(size); \
+        if (!MRFMAT_DATA(mat))                          \
+        {                                               \
+            MRFMAT_ROW(mat) = 0;                        \
+            MRFMAT_COL(mat) = 0;                        \
+            return MRFMAT_RES_MEM_ERROR;                \
+        }                                               \
+                                                        \
+        MRFMAT_ROW(mat) = row;                          \
+        MRFMAT_COL(mat) = col;                          \
+        return MRFMAT_RES_NOERROR;                      \
+    } while (0)
+
+#define MRFMAT_FREE(x)        \
+    do                        \
+    {                         \
+        free(MRFMAT_DATA(x)); \
+                              \
+        MRFMAT_ROW(x) = 0;    \
+        MRFMAT_COL(x) = 0;    \
+    } while (0)
+
+mrfmat_byte_t mrfmat_sizeof_cell(mrfmat_type_t type);
 
 #endif

@@ -77,16 +77,17 @@ typedef mrfmat_byte_t *mrfmat_data_t;
 enum __MRFMAT_TYPES_ENUM
 {
     MRFMAT_TYPES_BOOL,
-    MRFMAT_TYPES_SBYTE,
-    MRFMAT_TYPES_BYTE,
-    MRFMAT_TYPES_SSHORT,
-    MRFMAT_TYPES_SHORT,
-    MRFMAT_TYPES_SLONG,
-    MRFMAT_TYPES_LONG,
-    MRFMAT_TYPES_SLONGLONG,
-    MRFMAT_TYPES_LONGLONG,
-    MRFMAT_TYPES_FLOAT,
-    MRFMAT_TYPES_DOUBLE
+    MRFMAT_TYPES_INT8,
+    MRFMAT_TYPES_UINT8,
+    MRFMAT_TYPES_INT16,
+    MRFMAT_TYPES_UINT16,
+    MRFMAT_TYPES_INT32,
+    MRFMAT_TYPES_UINT32,
+    MRFMAT_TYPES_INT64,
+    MRFMAT_TYPES_UINT64,
+    MRFMAT_TYPES_DEC16,
+    MRFMAT_TYPES_DEC32,
+    MRFMAT_TYPES_DEC64
 };
 typedef mrfmat_byte_t mrfmat_type_t;
 
@@ -94,21 +95,23 @@ typedef mrfmat_byte_t mrfmat_type_t;
 struct __MRFMAT_T
 {
     mrfmat_data_t _data;
-    mrfmat_size_t _size;
-    mrfmat_size_t _capa;
+    mrfmat_size_t _row;
+    mrfmat_size_t _col;
 
-    mrfmat_type_t _type;
+    mrfmat_type_t _type : 7;
+    mrfmat_bool_t _row_major : 1;
 };
 #pragma pack(pop)
 typedef struct __MRFMAT_T mrfmat_t[1];
 typedef struct __MRFMAT_T *mrfmat_p;
 
-typedef const struct __MRFMAT_T *mrfmat_ct[1];
+typedef const struct __MRFMAT_T mrfmat_ct[1];
 
 #define MRFMAT_DATA(x) ((x)->_data)
-#define MRFMAT_SIZE(x) ((x)->_size)
-#define MRFMAT_CAPA(x) ((x)->_capa)
+#define MRFMAT_ROW(x) ((x)->_row)
+#define MRFMAT_COL(x) ((x)->_col)
 #define MRFMAT_TYPE(x) ((x)->_type)
+#define MRFMAT_ROW_MAJOR(x) ((x)->_row_major)
 
 enum __MRFMAT_RES_ENUM
 {
@@ -120,9 +123,17 @@ typedef mrfmat_byte_t mrfmat_res_t;
 /* init functions */
 
 __MRFMAT_DECLSPEC void mrfmat_init(
-    mrfmat_t mat, mrfmat_type_t type);
+    mrfmat_t mat, mrfmat_type_t type, mrfmat_bool_t row_major);
 __MRFMAT_DECLSPEC void mrfmat_inits(
-    mrfmat_type_t type, mrfmat_p mat, ...);
+    mrfmat_type_t type, mrfmat_bool_t row_major, mrfmat_p mat, ...);
+
+__MRFMAT_DECLSPEC void mrfmat_init2(
+    mrfmat_t mat, mrfmat_data_t data, mrfmat_size_t row, mrfmat_size_t col, mrfmat_type_t type, mrfmat_bool_t row_major);
+
+__MRFMAT_DECLSPEC mrfmat_res_t mrfmat_init_alloc(
+    mrfmat_t mat, mrfmat_type_t type, mrfmat_bool_t row_major, mrfmat_size_t row, mrfmat_size_t col);
+__MRFMAT_DECLSPEC mrfmat_res_t mrfmat_alloc(
+    mrfmat_t mat, mrfmat_size_t row, mrfmat_size_t col);
 
 __MRFMAT_DECLSPEC void mrfmat_free(
     mrfmat_t mat);
@@ -133,6 +144,56 @@ __MRFMAT_DECLSPEC void mrfmat_clear(
     mrfmat_t mat);
 __MRFMAT_DECLSPEC void mrfmat_clears(
     mrfmat_p mat, ...);
+
+__MRFMAT_DECLSPEC mrfmat_res_t mrfmat_clear_realloc(
+    mrfmat_t mat, mrfmat_size_t row, mrfmat_size_t col);
+
+__MRFMAT_DECLSPEC mrfmat_res_t mrfmat_clear_expand(
+    mrfmat_t mat, mrfmat_size_t row, mrfmat_size_t col);
+
+__MRFMAT_DECLSPEC mrfmat_res_t mrfmat_clear_shrink(
+    mrfmat_t mat, mrfmat_size_t row, mrfmat_size_t col);
+
+__MRFMAT_DECLSPEC void mrfmat_swap(
+    mrfmat_t mat1, mrfmat_t mat2);
+
+/* data functions */
+
+inline mrfmat_data_t mrfmat_get_data(
+    mrfmat_t mat)
+{
+    return MRFMAT_DATA(mat);
+}
+
+inline mrfmat_size_t mrfmat_get_row(
+    mrfmat_ct mat)
+{
+    return MRFMAT_ROW(mat);
+}
+
+inline mrfmat_size_t mrfmat_get_col(
+    mrfmat_ct mat)
+{
+    return MRFMAT_COL(mat);
+}
+
+inline mrfmat_size_t mrfmat_get_size(
+    mrfmat_ct mat)
+{
+    return MRFMAT_ROW(mat) * MRFMAT_COL(mat);
+}
+
+inline mrfmat_type_t mrfmat_get_type(
+    mrfmat_ct mat)
+{
+    return MRFMAT_TYPE(mat);
+}
+
+inline mrfmat_bool_t mrfmat_get_row_major(
+    mrfmat_ct mat)
+{
+    return MRFMAT_ROW_MAJOR(mat);
+}
 
 #ifdef __cplusplus
 }
